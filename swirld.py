@@ -64,7 +64,7 @@ class Node:
         self.famous = {}
 
         # {event-hash => int}: 0 or 1 + max(height of parents) (only useful for
-        # drawing, it may move to viz.py)
+        # drawing, it may move to hashgraph.py)
         self.height = {}
         # {event-hash => {member-pk => event-hash}}: stores for each event ev
         # and for each member m the latest event from m having same round

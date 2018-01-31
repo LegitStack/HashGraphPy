@@ -18,4 +18,4 @@ consistent and partition tolerant, peer-to-peer append-only log.
 ## Usage
 For now it is just an (not proper)implementation of the hashgraph consensus algorithm.
 You can see how network evolves in real time.
-        bokeh serve --show viz.py --args <number of nodes>
+        ```bokeh serve --show hashgraph.py --args <number of nodes>```
