@@ -46,14 +46,14 @@ class App:
             next(m)
 
         def toggle():
-            if play.label == '► Play':
-                play.label = '❚❚ Pause'
+            if play.label == 'Play':
+                play.label = 'Pause'
                 curdoc().add_periodic_callback(self.animate, 50)
             else:
-                play.label = '► Play'
+                play.label = 'Play'
                 curdoc().remove_periodic_callback(self.animate)
 
-        play = Button(label='► Play', width=60)
+        play = Button(label='Play', width=60)
         play.on_click(toggle)
 
         def sel_node(new):

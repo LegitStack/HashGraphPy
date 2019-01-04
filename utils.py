@@ -14,11 +14,11 @@ def toposort(nodes, parents):
         elif u in nodes:
             seen[u] = 0
             for v in parents(u):
-                yield  visit(v)
+                yield from visit(v)
             seen[u] = 1
             yield u
     for u in nodes:
-        yield  visit(u)
+        yield from visit(u)
 
 
 def bfs(s, succ):

@@ -4,7 +4,7 @@ from collections import namedtuple, defaultdict
 from pickle import dumps, loads
 from random import choice
 from time import time
-from itertools import izip_longest
+from itertools import zip_longest
 from functools import reduce
 
 from pysodium import (crypto_sign_keypair, crypto_sign, crypto_sign_open,
@@ -59,12 +59,12 @@ class Node:
         self.consensus = set()
         # {event-hash => {event-hash => bool}}
         self.votes = defaultdict(dict)
-        # {round-num => {member-pk => event-hash}}: 
+        # {round-num => {member-pk => event-hash}}:
         self.witnesses = defaultdict(dict)
         self.famous = {}
 
         # {event-hash => int}: 0 or 1 + max(height of parents) (only useful for
-        # drawing, it may move to hashgraph.py)
+        # drawing, it may move to viz.py)
         self.height = {}
         # {event-hash => {member-pk => event-hash}}: stores for each event ev
         # and for each member m the latest event from m having same round
@@ -174,7 +174,7 @@ class Node:
             return b
 
     def _higher(self, a, b):
-        for x, y in izip_longest(self.ancestors(a), self.ancestors(b)):
+        for x, y in zip_longest(self.ancestors(a), self.ancestors(b)):
             if x == b or y is None:
                 return True
             elif y == a or x is None:
