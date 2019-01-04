@@ -7,12 +7,11 @@ from base64 import b64encode
 from time import localtime, strftime
 
 from bokeh.io import curdoc
-from bokeh.layouts import layout, widgetbox, row
+from bokeh.layouts import widgetbox, row
 from bokeh.plotting import figure
 from bokeh.palettes import plasma, small_palettes
-from bokeh.models import (
-        FixedTicker, Button, ColumnDataSource, PanTool, Scroll,
-        RadioButtonGroup, RadioGroup, Arrow, NormalHead, HoverTool)
+from bokeh.models import Button, ColumnDataSource, PanTool, RadioButtonGroup, HoverTool
+#from bokeh.models import FixedTicker, RadioGroup, Arrow, Scroll, NormalHead
 from pysodium import crypto_sign_keypair
 
 from utils import bfs, randrange
@@ -61,7 +60,11 @@ class App:
             node = self.nodes[new]
             self.tbd = {}
             self.tr_src.data, self.links_src.data = self.extract_data(
-                    node, bfs((node.head,), lambda u: node.hg[u].p), 0)
+                node,
+                bfs(
+                    (node.head,),
+                    lambda u: node.hg[u].p),
+                0)
             for u, j in tuple(self.tbd.items()):
                 self.tr_src.data['line_alpha'][j] = 1 if node.famous.get(u) else 0
                 if u in node.idx:
@@ -73,17 +76,21 @@ class App:
             self.tr_src.trigger('data', None, self.tr_src.data)
 
         selector = RadioButtonGroup(
-                labels=['Node %i' % i for i in range(n_nodes)], active=0,
-                name='Node to inspect')
+            labels=['Node %i' % i for i in range(n_nodes)],
+            active=0,
+            name='Node to inspect')
         selector.on_click(sel_node)
 
         plot = figure(
-                plot_height=700, plot_width=900, y_range=(0, 30),
-                tools=[PanTool(),
-                       HoverTool(tooltips=[
-                           ('round', '@round'), ('hash', '@hash'),
-                           ('timestamp', '@time'), ('payload', '@payload'),
-                           ('number', '@idx')])])
+            plot_height=700, plot_width=900, y_range=(0, 30),
+            tools=[
+                PanTool(),
+                HoverTool(tooltips=[
+                    ('round', '@round'),
+                    ('hash', '@hash'),
+                    ('timestamp', '@time'),
+                    ('payload', '@payload'),
+                    ('number', '@idx')])])
         plot.xgrid.grid_line_color = None
         plot.xaxis.minor_tick_line_color = None
         plot.ygrid.grid_line_color = None
@@ -94,25 +101,50 @@ class App:
         #self.links_rend = plot.add_layout(
         #        Arrow(end=NormalHead(fill_color='black'), x_start='x0', y_start='y0', x_end='x1',
         #        y_end='y1', source=self.links_src))
-        self.links_rend = plot.segment(color='#777777',
-                x0='x0', y0='y0', x1='x1',
-                y1='y1', source=self.links_src, line_width='width')
+        self.links_rend = plot.segment(
+            color='#777777',
+            x0='x0', y0='y0',
+            x1='x1', y1='y1',
+            source=self.links_src,
+            line_width='width')
 
         self.tr_src = ColumnDataSource(
-                data={'x': [], 'y': [], 'round_color': [], 'idx': [],
-                    'line_alpha': [], 'round': [], 'hash': [], 'payload': [],
-                    'time': []})
+            data={
+                'x': [], 'y': [],
+                'round_color': [],
+                'idx': [],
+                'line_alpha': [],
+                'round': [],
+                'hash': [],
+                'payload': [],
+                'time': []})
 
-        self.tr_rend = plot.circle(x='x', y='y', size=20, color='round_color',
-                                   line_alpha='line_alpha', source=self.tr_src, line_width=5)
+        self.tr_rend = plot.circle(
+            x='x',
+            y='y',
+            size=20,
+            color='round_color',
+            line_alpha='line_alpha',
+            source=self.tr_src,
+            line_width=5)
 
         sel_node(0)
-        curdoc().add_root(row([widgetbox(play, selector, width=300), plot], sizing_mode='fixed'))
+        curdoc().add_root(
+            row(
+                [widgetbox(play, selector, width=300), plot],
+                sizing_mode='fixed'))
 
     def extract_data(self, node, trs, i):
-        tr_data = {'x': [], 'y': [], 'round_color': [], 'idx': [],
-                'line_alpha': [], 'round': [], 'hash': [], 'payload': [],
-                'time': []}
+        tr_data = {
+            'x': [],
+            'y': [],
+            'round_color': [],
+            'idx': [],
+            'line_alpha': [],
+            'round': [],
+            'hash': [],
+            'payload': [],
+            'time': []}
         links_data = {'x0': [], 'y0': [], 'x1': [], 'y1': [], 'width': []}
         for j, u in enumerate(trs):
             self.tbd[u] = i + j

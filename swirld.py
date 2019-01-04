@@ -2,7 +2,6 @@
 
 from collections import namedtuple, defaultdict
 from pickle import dumps, loads
-from random import choice
 from time import time
 from itertools import zip_longest
 from functools import reduce
@@ -23,8 +22,7 @@ def majority(it):
         hits[int(x)] += s
     if hits[0] > hits[1]:
         return False, hits[0]
-    else:
-        return True, hits[1]
+    return True, hits[1]
 
 
 Event = namedtuple('Event', 'd p t c s')
@@ -122,13 +120,17 @@ class Node:
     def sync(self, pk, payload):
         """Update hg and return new event ids in topological order."""
 
-        info = crypto_sign(dumps({c: self.height[h]
-                for c, h in self.can_see[self.head].items()}), self.sk)
+        info = crypto_sign(
+            dumps({
+                c: self.height[h]
+                for c, h in self.can_see[self.head].items()}),
+            self.sk)
         msg = crypto_sign_open(self.network[pk](self.pk, info), pk)
 
         remote_head, remote_hg = loads(msg)
-        new = tuple(toposort(remote_hg.keys() - self.hg.keys(),
-                       lambda u: remote_hg[u].p))
+        new = tuple(toposort(
+            remote_hg.keys() - self.hg.keys(),
+            lambda u: remote_hg[u].p))
 
         for h in new:
             ev = remote_hg[h]
@@ -170,14 +172,13 @@ class Node:
     def maxi(self, a, b):
         if self.higher(a, b):
             return a
-        else:
-            return b
+        return b
 
     def _higher(self, a, b):
         for x, y in zip_longest(self.ancestors(a), self.ancestors(b)):
             if x == b or y is None:
                 return True
-            elif y == a or x is None:
+            if y == a or x is None:
                 return False
 
     def higher(self, a, b):
@@ -279,7 +280,8 @@ class Node:
 
     def find_order(self, new_c):
         to_int = lambda x: int.from_bytes(self.hg[x].s, byteorder='big')
-
+        ts = {}
+        white = 0
         for r in sorted(new_c):
             f_w = {w for w in self.witnesses[r].values() if self.famous[w]}
             white = reduce(lambda a, b: a ^ to_int(b), f_w, 0)
@@ -288,8 +290,10 @@ class Node:
             for x in bfs(filter(self.tbd.__contains__, f_w),
                          lambda u: (p for p in self.hg[u].p if p in self.tbd)):
                 c = self.hg[x].c
-                s = {w for w in f_w if c in self.can_see[w]
-                                    and self.higher(self.can_see[w][c], x)}
+                s = {
+                    w for w in f_w
+                    if c in self.can_see[w]
+                    and self.higher(self.can_see[w][c], x)}
                 if sum(self.stake[self.hg[w].c] for w in s) > self.tot_stake / 2:
                     self.tbd.remove(x)
                     seen.add(x)
